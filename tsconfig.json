@@ -1,0 +1,23 @@
+{
+  /* "ts-node": {
+    "compilerOptions": {
+      "esModuleInterop": true,
+      "baseUrl": "src"
+    }
+  }, */
+  "compilerOptions": {
+    "target": "es6",
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "rootDir": "./",
+    "outDir": "./dist",
+    "paths": {
+      "models/*": ["../../models/*"],
+      "connection/*": ["../connection/*"],
+      "routes/*": ["../routes/*"]
+    },
+    "noImplicitAny": false,
+    "moduleResolution": "node",
+    "plugins": [{ "transform": "typescript-transform-paths" }]
+  }
+}
