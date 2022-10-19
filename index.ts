@@ -120,5 +120,5 @@ app.delete('/product/:id', (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log('app in http://localhost:3000');
+  console.log('app listening on port 3000');
 });
