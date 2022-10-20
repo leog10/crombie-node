@@ -2,7 +2,6 @@ import express, { urlencoded } from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 
-const PORT = 5000;
 const app = express();
 
 // app.use(cors({ origin: 'http://localhost:3000' }));
@@ -124,6 +123,6 @@ app.delete('/product/:id', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
+app.listen(5000, () => {
+  console.log(`App listening on port ${5000}`);
 });
