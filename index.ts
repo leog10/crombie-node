@@ -5,7 +5,8 @@ import cors from 'cors';
 const PORT = 5000;
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+// app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors());
 
 app.use(bodyParser.json(), urlencoded({ extended: true }));
 
