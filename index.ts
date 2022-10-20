@@ -1,7 +1,11 @@
 import express, { urlencoded } from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 
+const PORT = 5000;
 const app = express();
+
+app.use(cors({ origin: 'http://localhost:3000' }));
 
 app.use(bodyParser.json(), urlencoded({ extended: true }));
 
@@ -61,6 +65,6 @@ app.delete('/product/:id', (req, res) => {
   res.status(200).json({ msg: 'Producto eliminado!' });
 });
 
-app.listen(3000, () => {
-  console.log('app in http://localhost:3000');
+app.listen(PORT, () => {
+  console.log(`App listening on port ${PORT}`);
 });
