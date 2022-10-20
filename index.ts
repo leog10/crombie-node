@@ -13,12 +13,51 @@ type Product = {
   name: string;
   brand: string;
   id: number;
+  deleted: boolean;
+};
+
+type ProductDto = {
+  name: string;
+  brand: string;
+  id: number;
 };
 
 const products: Product[] = [];
 
 app.get('/product', (req, res) => {
-  res.status(200).json({ products: products });
+  const productsDto: ProductDto[] = products
+    .filter((p) => !p.deleted)
+    .map((p) => ({
+      name: p.name,
+      brand: p.brand,
+      id: p.id,
+    }));
+
+  res.status(200).json(productsDto);
+});
+
+app.get('/product/:id', (req, res) => {
+  const id = +req.params.id;
+
+  try {
+    const index = products.findIndex((p) => p.id === id);
+
+    if (index === -1) {
+      throw new Error('Product not found');
+    }
+
+    if (products[index].deleted) throw new Error('Product not found');
+
+    const productDto: ProductDto = {
+      name: products[index].name,
+      brand: products[index].brand,
+      id: products[index].id,
+    };
+
+    res.status(200).json(productDto);
+  } catch (error) {
+    res.status(404).json({ msg: error.message });
+  }
 });
 
 app.post('/product', (req, res) => {
@@ -26,12 +65,11 @@ app.post('/product', (req, res) => {
   const id = new Date().getTime();
 
   try {
-    if (!name || !brand) throw new Error('campos invalidos');
-    const newProduct = { name, brand, id };
+    if (!name || !brand) throw new Error('error: name and brand are required');
+    const newProduct: Product = { name, brand, id, deleted: false };
     products.push(newProduct);
-    res
-      .status(201)
-      .json({ msg: 'Producto creado con exito', product: newProduct });
+    const newProductDto: ProductDto = { name, brand, id };
+    res.status(201).json({ msg: 'Product created', product: newProductDto });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
@@ -43,26 +81,46 @@ app.put('/product/:id', (req, res) => {
 
   try {
     if (!name || !brand) {
-      throw new Error('campos incorrectos');
+      throw new Error('error: name and brand are required');
     }
 
     const index = products.findIndex((p) => p.id === id);
 
     if (index === -1) {
-      throw new Error('producto no encontrado');
+      throw new Error('product not found');
     }
+
+    if (products[index].deleted) throw new Error('Product not found');
 
     products[index].name = name;
     products[index].brand = brand;
 
-    res.status(200).json({ msg: 'Producto actualizado con exito' });
+    res.status(200).json({ msg: 'Product updated' });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
 });
 
 app.delete('/product/:id', (req, res) => {
-  res.status(200).json({ msg: 'Producto eliminado!' });
+  const id = +req.params.id;
+
+  try {
+    const index = products.findIndex((p) => p.id === id);
+
+    if (index === -1) {
+      throw new Error('product not found');
+    }
+
+    if (products[index].deleted) {
+      throw new Error('product not found');
+    } else {
+      products[index].deleted = true;
+    }
+
+    res.status(200).json({ msg: `Product with id: ${id} deleted` });
+  } catch (error) {
+    res.status(400).json({ msg: error.message });
+  }
 });
 
 app.listen(PORT, () => {
