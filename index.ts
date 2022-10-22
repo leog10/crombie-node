@@ -1,13 +1,10 @@
 import express, { urlencoded } from 'express';
-import bodyParser from 'body-parser';
 import cors from 'cors';
 
 const app = express();
 
-// app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(cors());
-
-app.use(bodyParser.json(), urlencoded({ extended: true }));
+app.use(express.json());
 
 type Product = {
   name: string;
