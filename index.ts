@@ -9,6 +9,7 @@ app.use(express.json());
 type Product = {
   name: string;
   brand: string;
+  price: number;
   id: number;
   deleted: boolean;
 };
@@ -16,6 +17,7 @@ type Product = {
 type ProductDto = {
   name: string;
   brand: string;
+  price: number;
   id: number;
 };
 
@@ -27,6 +29,7 @@ app.get('/product', (req, res) => {
     .map((p) => ({
       name: p.name,
       brand: p.brand,
+      price: p.price,
       id: p.id,
     }));
 
@@ -48,6 +51,7 @@ app.get('/product/:id', (req, res) => {
     const productDto: ProductDto = {
       name: products[index].name,
       brand: products[index].brand,
+      price: products[index].price,
       id: products[index].id,
     };
 
@@ -58,14 +62,14 @@ app.get('/product/:id', (req, res) => {
 });
 
 app.post('/product', (req, res) => {
-  const { name, brand } = req.body;
+  const { name, brand, price } = req.body;
   const id = new Date().getTime();
 
   try {
     if (!name || !brand) throw new Error('error: name and brand are required');
-    const newProduct: Product = { name, brand, id, deleted: false };
+    const newProduct: Product = { name, brand, price, id, deleted: false };
     products.push(newProduct);
-    const newProductDto: ProductDto = { name, brand, id };
+    const newProductDto: ProductDto = { name, brand, price, id };
     res.status(201).json({ msg: 'Product created', product: newProductDto });
   } catch (error) {
     res.status(400).json({ msg: error.message });
@@ -73,24 +77,23 @@ app.post('/product', (req, res) => {
 });
 
 app.put('/product/:id', (req, res) => {
-  const { name, brand } = req.body;
+  const { name, brand, price } = req.body;
   const id = +req.params.id;
 
   try {
-    if (!name || !brand) {
-      throw new Error('error: name and brand are required');
+    if (!name || !brand || !price) {
+      throw new Error('error: name, brand and price are required');
     }
 
     const index = products.findIndex((p) => p.id === id);
 
-    if (index === -1) {
+    if (index === -1 || products[index].deleted) {
       throw new Error('product not found');
     }
 
-    if (products[index].deleted) throw new Error('Product not found');
-
     products[index].name = name;
     products[index].brand = brand;
+    products[index].price = price;
 
     res.status(200).json({ msg: 'Product updated' });
   } catch (error) {
