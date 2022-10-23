@@ -66,7 +66,8 @@ app.post('/product', (req, res) => {
   const id = new Date().getTime();
 
   try {
-    if (!name || !brand) throw new Error('error: name and brand are required');
+    if (!name || !brand || !price)
+      throw new Error('error: name, brand and price are required');
     const newProduct: Product = { name, brand, price, id, deleted: false };
     products.push(newProduct);
     const newProductDto: ProductDto = { name, brand, price, id };
