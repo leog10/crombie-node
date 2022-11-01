@@ -134,19 +134,23 @@ app.put('/product/:id', (req, res) => {
   const id = +req.params.id;
 
   try {
-    if (!name || !brand || !price) {
-      throw new Error('error: name, brand and price are required');
-    }
-
     const index = products.findIndex((p) => p.id === id);
 
     if (index === -1 || products[index].deleted) {
       throw new Error('product not found');
     }
 
-    products[index].name = name;
-    products[index].brand = brand;
-    products[index].price = price;
+    if (name) {
+      products[index].name = name;
+    }
+
+    if (brand) {
+      products[index].brand = brand;
+    }
+
+    if (price) {
+      products[index].price = price;
+    }
 
     res.status(200).json({ msg: 'Product updated' });
   } catch (error) {
