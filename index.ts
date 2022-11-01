@@ -1,9 +1,17 @@
-import express, { urlencoded } from 'express';
+import express from 'express';
 import cors from 'cors';
 
 const app = express();
 
-app.use(cors());
+// const corsOptions = {
+//   origin: 'https://radiant-kitten-56bc13.netlify.app/',
+// };
+
+const corsOptions = {
+  origin: 'http://localhost:3000',
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 type Product = {
@@ -24,16 +32,60 @@ type ProductDto = {
 const products: Product[] = [];
 
 app.get('/product', (req, res) => {
-  const productsDto: ProductDto[] = products
-    .filter((p) => !p.deleted)
-    .map((p) => ({
-      name: p.name,
-      brand: p.brand,
-      price: p.price,
-      id: p.id,
-    }));
+  const name = req.query.name as string;
+  const brand = req.query.brand as string;
 
-  res.status(200).json(productsDto);
+  if (name) {
+    try {
+      const productsDto: ProductDto[] = products
+        .filter(
+          (p) => !p.deleted && p.name.toLowerCase().includes(name.toLowerCase())
+        )
+        .map((p) => ({
+          name: p.name,
+          brand: p.brand,
+          price: p.price,
+          id: p.id,
+        }));
+
+      if (productsDto.length) return res.status(200).json(productsDto);
+
+      throw new Error('No products found with your search keywords');
+    } catch (error) {
+      res.status(400).json(error.message);
+    }
+  } else if (brand) {
+    try {
+      const productsDto: ProductDto[] = products
+        .filter(
+          (p) =>
+            !p.deleted && p.brand.toLowerCase().includes(brand.toLowerCase())
+        )
+        .map((p) => ({
+          name: p.name,
+          brand: p.brand,
+          price: p.price,
+          id: p.id,
+        }));
+
+      if (productsDto.length) return res.status(200).json(productsDto);
+
+      throw new Error('No products found with your search keywords');
+    } catch (error) {
+      res.status(400).json(error.message);
+    }
+  } else {
+    const productsDto: ProductDto[] = products
+      .filter((p) => !p.deleted)
+      .map((p) => ({
+        name: p.name,
+        brand: p.brand,
+        price: p.price,
+        id: p.id,
+      }));
+
+    res.status(200).json(productsDto);
+  }
 });
 
 app.get('/product/:id', (req, res) => {
