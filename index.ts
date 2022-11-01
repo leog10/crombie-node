@@ -3,13 +3,13 @@ import cors from 'cors';
 
 const app = express();
 
-// const corsOptions = {
-//   origin: 'https://radiant-kitten-56bc13.netlify.app/',
-// };
-
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: 'https://radiant-kitten-56bc13.netlify.app/',
 };
+
+/* const corsOptions = {
+  origin: 'http://localhost:3000',
+}; */
 
 app.use(cors(corsOptions));
 app.use(express.json());
