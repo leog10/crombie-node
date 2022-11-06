@@ -34,6 +34,20 @@ const products: Product[] = [];
 app.get('/product', (req, res) => {
   const name = req.query.name as string;
   const brand = req.query.brand as string;
+  const limit = req.query.limit || '5';
+  const page = !req.query.page || req.query.page === '0' ? '1' : req.query.page;
+  const offset = +page - 1 && (+page - 1) * +limit;
+  const nextLimit = offset + +limit;
+
+  if (+req.query.limit < 0 || req.query.limit === '0') {
+    return res.status(400).json('Query limit must be a positive number');
+  }
+
+  if (+req.query.limit > 15) {
+    return res
+      .status(400)
+      .json({ error: 'Query limit exceeded. Max limit: 15' });
+  }
 
   if (name) {
     try {
@@ -48,11 +62,42 @@ app.get('/product', (req, res) => {
           id: p.id,
         }));
 
-      if (productsDto.length) return res.status(200).json(productsDto);
+      if (productsDto.length) {
+        const pages = Math.ceil(productsDto.length / +limit);
 
-      throw new Error('No products found with your search keywords');
+        try {
+          const result = productsDto.slice(offset, nextLimit);
+
+          if (!result.length) {
+            return res.status(200).json([]);
+          }
+
+          const showing =
+            productsDto.length === 0
+              ? '0'
+              : offset + 1 === nextLimit || offset + 1 === productsDto.length
+              ? `${offset + 1} of ${productsDto.length}`
+              : nextLimit > productsDto.length
+              ? `${offset + 1}-${productsDto.length} of ${productsDto.length}`
+              : pages === 1
+              ? `1-${productsDto.length} of ${productsDto.length}`
+              : `${offset + 1}-${nextLimit} of ${productsDto.length}`;
+
+          return res.status(200).json({
+            products: result,
+            page: `${+page}/${pages}`,
+            showing,
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      return res
+        .status(404)
+        .json({ error: 'No products found with your search keywords' });
     } catch (error) {
-      res.status(400).json(error.message);
+      console.log(error);
     }
   } else if (brand) {
     try {
@@ -68,11 +113,42 @@ app.get('/product', (req, res) => {
           id: p.id,
         }));
 
-      if (productsDto.length) return res.status(200).json(productsDto);
+      if (productsDto.length) {
+        const pages = Math.ceil(productsDto.length / +limit);
 
-      throw new Error('No products found with your search keywords');
+        try {
+          const result = productsDto.slice(offset, nextLimit);
+
+          if (!result.length) {
+            return res.status(200).json([]);
+          }
+
+          const showing =
+            productsDto.length === 0
+              ? '0'
+              : offset + 1 === nextLimit || offset + 1 === productsDto.length
+              ? `${offset + 1} of ${productsDto.length}`
+              : nextLimit > productsDto.length
+              ? `${offset + 1}-${productsDto.length} of ${productsDto.length}`
+              : pages === 1
+              ? `${productsDto.length} of ${productsDto.length}`
+              : `${offset + 1}-${nextLimit} of ${productsDto.length}`;
+
+          return res.status(200).json({
+            products: result,
+            page: `${+page}/${pages}`,
+            showing,
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      return res
+        .status(404)
+        .json({ error: 'No products found with your search keywords' });
     } catch (error) {
-      res.status(400).json(error.message);
+      console.log(error);
     }
   } else {
     const productsDto: ProductDto[] = products
@@ -84,7 +160,34 @@ app.get('/product', (req, res) => {
         id: p.id,
       }));
 
-    res.status(200).json(productsDto);
+    const pages = Math.ceil(productsDto.length / +limit);
+
+    try {
+      const result = productsDto.slice(offset, nextLimit);
+
+      if (!result.length) {
+        return res.status(200).json([]);
+      }
+
+      const showing =
+        productsDto.length === 0
+          ? '0'
+          : offset + 1 === nextLimit || offset + 1 === productsDto.length
+          ? `${offset + 1} of ${productsDto.length}`
+          : nextLimit > productsDto.length
+          ? `${offset + 1}-${productsDto.length} of ${productsDto.length}`
+          : pages === 1
+          ? `${productsDto.length} of ${productsDto.length}`
+          : `${offset + 1}-${nextLimit} of ${productsDto.length}`;
+
+      return res.status(200).json({
+        products: result,
+        page: `${+page}/${pages}`,
+        showing,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 });
 
@@ -107,7 +210,7 @@ app.get('/product/:id', (req, res) => {
       id: products[index].id,
     };
 
-    res.status(200).json(productDto);
+    return res.status(200).json(productDto);
   } catch (error) {
     res.status(404).json({ msg: error.message });
   }
